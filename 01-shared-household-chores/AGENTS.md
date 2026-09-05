@@ -6,12 +6,12 @@ Stack: Python, Django, SQLite, Django templates/forms, and plain CSS/SVG. The MV
 
 ## Commands
 
-Run from `01-shared-household-chores/`. These commands are planned for the first setup task; the Django project does not exist yet.
+Run from `01-shared-household-chores/`. Use Django's built-in test runner.
 
 - `uv sync` — install dependencies.
 - `uv run python manage.py runserver` — start the development server.
 - `uv run python manage.py test` — run the whole suite.
-- `uv run python manage.py test household.tests.test_home` — run one test module once it exists.
+- `uv run python manage.py test household.tests.test_home` — run one test module.
 
 ## Rules
 
