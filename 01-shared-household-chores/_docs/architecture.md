@@ -10,7 +10,7 @@ Product requirements: [plan.md](plan.md).
 
 Build one server-rendered Django application backed by SQLite. Use Django templates and forms for the interface, with plain CSS and SVG or static images for the gardens.
 
-The application supports one household with predefined, equal members and no login. Users select the member who completed a chore. Member pages organize public household information; they do not represent authenticated accounts.
+The application supports one household with three predefined, equal members and no login. The members are Alex, Sam, and Jamie, displayed in that order. Users select the member who completed a chore. Member pages organize public household information; they do not represent authenticated accounts.
 
 The core flow is:
 
@@ -73,7 +73,7 @@ Use three main models. A separate Household model is unnecessary for the single-
 | Chore | Identifier, name, frequency, point value, next due date, active/deleted state, completion version | One chore has many completions |
 | Completion | Identifier, member, chore, completion timestamp, points earned, chore-name snapshot, completed version | Belongs to one member and one chore |
 
-Predefine members through a repeatable setup mechanism, such as a data migration or fixture. Member management is outside the initial UI.
+Predefine Alex, Sam, and Jamie in that display order through a repeatable setup mechanism, such as a data migration or fixture. Member management is outside the initial UI.
 
 Store awarded points on each completion. Editing a chore's point value must not change previous awards. A chore-name snapshot preserves readable historical records after renaming.
 
@@ -97,7 +97,7 @@ Keep transactions short and use concurrency handling that works with SQLite; do 
 
 ### Due status and recurrence
 
-Store a next due date and derive status using the household's local date:
+Use `Europe/Berlin` as the household timezone for local due dates, displayed completion dates, and calendar-month boundaries. Store a next due date and derive status using the household's local date:
 
 - Before the due date: not yet due.
 - On the due date: due.
@@ -105,13 +105,37 @@ Store a next due date and derive status using the household's local date:
 
 Overdue chores remain overdue until completed. No scheduled process advances an unfinished chore.
 
-The precise frequency representation and recurrence rule remain product decisions. A simple candidate is a positive interval in days, with the next due date calculated from the local completion date. Confirm this before implementation rather than silently treating it as a requirement of the plan.
+Represent frequency as a whole-number interval in days from 1 through 365 inclusive. Frequency is required. Reject blank, zero, negative, fractional, unsupported, and out-of-range values.
+
+Anchor recurrence to the previous scheduled due date, not the completion date. After a successful completion, add whole frequency intervals to the stored due date until the resulting next due date is strictly after the local completion date. This rule keeps a chore on its schedule while ensuring that completion after multiple missed intervals never leaves it immediately due or overdue.
+
+Reject attempts to complete a chore before its local due date. A rejected early attempt creates no completion, awards no points or lifetime XP, and changes neither the due date nor completion version.
+
+For a new chore, let the user choose the initial due date. Default it to the current `Europe/Berlin` date and permit past dates.
+
+Editing a chore's frequency leaves its stored due date unchanged whether that date is future, due, or overdue. The new frequency applies when calculating the next due date after the next successful completion. Direct due-date editing is allowed. Name-only and point-only edits leave the due date unchanged. All edits preserve completion history and previously awarded points.
+
+### Chore values and names
+
+Points are required whole numbers from 1 through 100 inclusive. Reject blank, zero, negative, fractional, and out-of-range values.
+
+A chore name is required; reject a blank name, including one that is empty after normalization. Trim leading and trailing whitespace, collapse internal whitespace to single spaces, and apply the 100-character maximum after normalization. Reject case-insensitive duplicate names among active chores. An inactive chore does not prevent reuse of its name.
+
+### Scheduling examples
+
+- On-time completion and year rollover: a 7-day chore due on December 31, 2026 and completed that day becomes due on January 7, 2027.
+- Completion after multiple missed intervals: a 7-day chore due on January 1, 2026 and completed on January 20 advances through January 8 and January 15, then becomes due on January 22, 2026.
+- Early completion: an attempt on January 9, 2026 for a chore due on January 10 is rejected. It creates no completion or award and changes neither the completion version nor due date.
+- Future-due frequency edit: on March 10, 2026, changing a 7-day chore due March 20 to 14 days leaves the due date at March 20. If completed on March 20, it next becomes due April 3, using the new 14-day interval.
+- Overdue frequency edit: on March 20, 2026, changing a 7-day chore still due March 1 to 14 days leaves the overdue due date at March 1. Completion on March 20 advances from March 1 through March 15 to a next due date of March 29, using the new 14-day interval.
 
 ### Monthly points
 
 Sum awarded points from completions within the current calendar month in the configured household timezone. Use the start of the month as an inclusive boundary and the start of the next month as an exclusive boundary.
 
 At a new month, the query naturally returns the new month's total. There is no reset job and no deletion of history.
+
+For example, in `Europe/Berlin`, a completion at January 31, 2026 23:30 counts toward January, while one at February 1, 2026 00:30 counts toward February. Each month begins inclusively at local midnight on its first day and ends exclusively at the next month's start.
 
 ### Lifetime XP
 
@@ -123,7 +147,7 @@ Map lifetime XP to a fixed sequence of garden stages. Store thresholds in one sh
 
 The plan's example sequence is empty soil, seed, sprout, small plant, flowers, bushes, tree, and richer garden. Exact XP thresholds and artwork remain to be chosen. There is no separate Garden model, inventory, shop, or customization system.
 
-Store completion timestamps as timezone-aware timestamps and use one configured household timezone for month boundaries and due-date calculations. The timezone value remains to be selected.
+Store completion timestamps as timezone-aware timestamps and convert them to `Europe/Berlin` for displayed dates, month boundaries, and due-date calculations.
 
 ## 8. Development and deployment
 
@@ -158,13 +182,12 @@ Use focused tests for the behavior that protects household data:
 - No background workers, scheduled reset tasks, caches, or real-time synchronization are required initially.
 - The feature exclusions in [plan.md](plan.md) remain authoritative.
 
-## 11. Decisions still open
+## 11. Decision status
 
-- Predefined member names and ordering.
-- Household timezone.
-- Supported frequency choices and whether recurrence follows completion dates or a fixed schedule.
-- Whether not-yet-due chores can be completed early.
-- Initial due-date behavior and the effect of frequency edits on the existing due date.
+The owner approved the household, scheduling, and chore-validation rules in section 7 on 2026-09-06. No choices within that decision's scope remain open.
+
+The following decisions remain outside that scope:
+
 - Garden XP thresholds and artwork.
 - Hosting, production serving, and backup arrangements.
 
