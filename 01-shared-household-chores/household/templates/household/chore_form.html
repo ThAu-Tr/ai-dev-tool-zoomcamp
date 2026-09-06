@@ -1,0 +1,76 @@
+{% extends "household/base.html" %}
+
+{% block title %}
+  {% if is_edit %}Edit Chore{% else %}Add Chore{% endif %} — Shared Household Chores
+{% endblock %}
+
+{% block content %}
+  <h1>{% if is_edit %}Edit chore{% else %}Add chore{% endif %}</h1>
+
+  <form method="post" novalidate class="chore-form">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="form-errors" role="alert">
+        {% for error in form.non_field_errors %}
+          <p class="error-text">{{ error }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="form-group{% if form.name.errors %} form-group--error{% endif %}">
+      <label for="{{ form.name.id_for_label }}">Chore name</label>
+      {{ form.name }}
+      {% if form.name.errors %}
+        <div class="field-error" role="alert">
+          {% for error in form.name.errors %}
+            <p class="error-text">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="form-group{% if form.frequency_days.errors %} form-group--error{% endif %}">
+      <label for="{{ form.frequency_days.id_for_label }}">Frequency in days</label>
+      {{ form.frequency_days }}
+      {% if form.frequency_days.errors %}
+        <div class="field-error" role="alert">
+          {% for error in form.frequency_days.errors %}
+            <p class="error-text">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="form-group{% if form.points.errors %} form-group--error{% endif %}">
+      <label for="{{ form.points.id_for_label }}">Points</label>
+      {{ form.points }}
+      {% if form.points.errors %}
+        <div class="field-error" role="alert">
+          {% for error in form.points.errors %}
+            <p class="error-text">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="form-group{% if form.next_due_date.errors %} form-group--error{% endif %}">
+      <label for="{{ form.next_due_date.id_for_label }}">Next due date</label>
+      {{ form.next_due_date }}
+      {% if form.next_due_date.errors %}
+        <div class="field-error" role="alert">
+          {% for error in form.next_due_date.errors %}
+            <p class="error-text">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn--primary">
+        {% if is_edit %}Save changes{% else %}Create chore{% endif %}
+      </button>
+      <a href="{% url 'household:home' %}" class="btn btn--secondary">Cancel</a>
+    </div>
+  </form>
+{% endblock %}

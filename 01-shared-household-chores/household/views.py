@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 
-from django.shortcuts import render
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
 
+from household.forms import ChoreForm
 from household.models import Chore, Member
 from household.scheduling import DueStatus, evaluate_due
 
@@ -55,5 +57,47 @@ def home(request):
         {
             "members": Member.objects.order_by("display_order", "pk"),
             "active_chores": _active_chore_displays(),
+        },
+    )
+
+
+def chore_create(request):
+    if request.method == "POST":
+        form = ChoreForm(request.POST)
+        if form.is_valid():
+            chore = form.save()
+            messages.success(request, f'Chore "{chore.name}" created.')
+            return redirect("household:home")
+    else:
+        form = ChoreForm()
+
+    return render(
+        request,
+        "household/chore_form.html",
+        {
+            "form": form,
+            "is_edit": False,
+        },
+    )
+
+
+def chore_edit(request, pk):
+    chore = get_object_or_404(Chore, pk=pk, is_active=True)
+    if request.method == "POST":
+        form = ChoreForm(request.POST, instance=chore)
+        if form.is_valid():
+            chore = form.save()
+            messages.success(request, f'Chore "{chore.name}" updated.')
+            return redirect("household:home")
+    else:
+        form = ChoreForm(instance=chore)
+
+    return render(
+        request,
+        "household/chore_form.html",
+        {
+            "form": form,
+            "chore": chore,
+            "is_edit": True,
         },
     )

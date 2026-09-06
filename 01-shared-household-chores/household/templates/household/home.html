@@ -17,12 +17,18 @@
   </section>
 
   <section aria-labelledby="chores-heading">
-    <h2 id="chores-heading">Active chores</h2>
+    <div class="section-header">
+      <h2 id="chores-heading">Active chores</h2>
+      <a href="{% url 'household:chore_create' %}" class="btn btn--primary">Add chore</a>
+    </div>
     {% if active_chores %}
       <ul class="chore-list">
         {% for display in active_chores %}
           <li class="chore-card">
-            <h3>{{ display.chore.name }}</h3>
+            <div class="chore-card-header">
+              <h3>{{ display.chore.name }}</h3>
+              <a href="{% url 'household:chore_edit' display.chore.pk %}" class="chore-edit-link">Edit</a>
+            </div>
             <dl>
               <div>
                 <dt>Frequency</dt>

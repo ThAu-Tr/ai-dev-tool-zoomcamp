@@ -70,6 +70,9 @@ class HomeTests(TestCase):
         self.assertContains(response, "1 point")
         self.assertContains(response, "10 points")
         self.assertContains(response, "2026-09-05")
+        self.assertContains(response, reverse("household:chore_create"))
+        self.assertContains(response, "Add chore")
+        self.assertContains(response, "Edit")
         self.assertNotContains(response, "Hidden inactive")
         self.assertNotContains(response, 'value="Hidden inactive"')
 
@@ -95,7 +98,8 @@ class HomeTests(TestCase):
         self.assertContains(response, "No active chores yet.")
         self.assertNotContains(response, 'class="chore-list"')
         self.assertNotContains(response, "Complete")
-        self.assertNotContains(response, "Add chore")
+        self.assertContains(response, reverse("household:chore_create"))
+        self.assertContains(response, "Add chore")
 
     def test_messages_render_before_page_content_with_correct_roles(self):
         request = RequestFactory().get(reverse("household:home"))
