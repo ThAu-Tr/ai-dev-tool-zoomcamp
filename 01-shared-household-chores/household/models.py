@@ -1,23 +1,19 @@
 """Core storage for the shared household."""
 
 import re
-from datetime import date
-from zoneinfo import ZoneInfo
-
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.functions import Lower
 from django.utils import timezone
 
+from household.scheduling import household_local_date as _scheduling_household_local_date
 
-HOUSEHOLD_TIME_ZONE = ZoneInfo("Europe/Berlin")
 
+def household_local_date():
+    """Compatibility import path retained for the initial migration."""
 
-def household_local_date() -> date:
-    """Return today's date in the household timezone."""
-
-    return timezone.localdate(timezone.now(), HOUSEHOLD_TIME_ZONE)
+    return _scheduling_household_local_date()
 
 
 def normalize_chore_name(name: str) -> str:
