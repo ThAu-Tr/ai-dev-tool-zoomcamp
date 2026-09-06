@@ -26,13 +26,17 @@ STATUS_LABELS = {
     DueStatus.NOT_YET_DUE: ("Not yet due", 2),
 }
 
+MAX_BIGINT = 2**63 - 1
+MAX_POSITIVE_INTEGER = 2**31 - 1
 
-def _parse_nonnegative_ascii_integer(value: str) -> int | None:
+
+def _parse_nonnegative_ascii_integer(value: str, *, maximum: int) -> int | None:
     """Return an integer only for non-negative ASCII decimal input."""
 
     if not value or not value.isascii() or not value.isdecimal():
         return None
-    return int(value)
+    parsed = int(value)
+    return parsed if parsed <= maximum else None
 
 
 def _active_chore_displays() -> list[ChoreDisplay]:
@@ -142,12 +146,15 @@ def chore_complete(request, pk):
     member_raw = request.POST.get("member", "").strip()
     version_raw = request.POST.get("completion_version", "").strip()
 
-    member_id = _parse_nonnegative_ascii_integer(member_raw)
+    member_id = _parse_nonnegative_ascii_integer(member_raw, maximum=MAX_BIGINT)
     if member_id is None:
         messages.error(request, "Please select a household member.")
         return redirect("household:home")
 
-    expected_version = _parse_nonnegative_ascii_integer(version_raw)
+    expected_version = _parse_nonnegative_ascii_integer(
+        version_raw,
+        maximum=MAX_POSITIVE_INTEGER,
+    )
     if expected_version is None:
         messages.error(request, "Invalid submission.")
         return redirect("household:home")

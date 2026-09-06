@@ -110,7 +110,7 @@ class ChoreCompleteViewTests(TestCase):
 
     def test_chore_complete_rejects_invalid_member_values_without_mutation(self):
         url = reverse("household:chore_complete", args=[self.due_chore.pk])
-        invalid_values = ("", "   ", "invalid", "²", "-1", "1.5")
+        invalid_values = ("", "   ", "invalid", "²", "-1", "1.5", str(2**63))
 
         for member in invalid_values:
             with self.subTest(member=member):
@@ -129,7 +129,7 @@ class ChoreCompleteViewTests(TestCase):
 
     def test_chore_complete_rejects_invalid_version_values_without_mutation(self):
         url = reverse("household:chore_complete", args=[self.due_chore.pk])
-        invalid_values = ("", "   ", "invalid", "²", "-1", "1.5")
+        invalid_values = ("", "   ", "invalid", "²", "-1", "1.5", str(2**31))
 
         for version in invalid_values:
             with self.subTest(version=version):
