@@ -19,10 +19,11 @@ Install `uv` and Git first. Run all commands below from `01-shared-household-cho
 ```sh
 uv sync
 uv run python manage.py migrate
+uv run python manage.py setup_members
 uv run python manage.py runserver
 ```
 
-`uv sync` installs the pinned Python runtime when needed, creates `.venv/`, and installs dependencies from `uv.lock`. No environment activation or separate SQLite installation is required. The empty app has no domain migrations yet; running `migrate` prepares the local SQLite database for later tasks.
+`uv sync` installs the pinned Python runtime when needed, creates `.venv/`, and installs dependencies from `uv.lock`. No environment activation or separate SQLite installation is required. Running `migrate` prepares the local SQLite database. Run `setup_members` after migrating to create the predefined members Alex, Sam, and Jamie in display order. The command is safe to repeat: it creates no duplicates and never changes existing member data. If an existing member conflicts with a required name or display order, it exits with an error and leaves all members unchanged.
 
 Open http://127.0.0.1:8000/ to see the placeholder page. Stop the server with Ctrl+C.
 
@@ -34,7 +35,7 @@ uv run python manage.py test household.tests.test_home
 uv run python manage.py check
 ```
 
-The smoke test verifies that the homepage returns HTTP 200 and renders the expected template and heading without login. It does not need a database because no domain models exist yet.
+The smoke test verifies that the homepage returns HTTP 200 and renders the expected template and heading without login.
 
 ## Project structure
 
@@ -43,7 +44,7 @@ The smoke test verifies that the homepage returns HTTP 200 and renders the expec
 - `pyproject.toml` and `uv.lock` — declared and locked dependencies.
 - `.python-version` — pinned Python runtime.
 
-Settings are for local development only: debug mode is enabled, the secret key is generated per process, and UTC is a temporary default until the household timezone is chosen. Production configuration is a separate backlog task. Virtual environments, secrets, and local SQLite files are excluded by the course repository's `.gitignore`.
+Settings are for local development only: debug mode is enabled, the secret key is generated per process, and the household timezone is Europe/Berlin. Production configuration is a separate backlog task. Virtual environments, secrets, and local SQLite files are excluded by the course repository's `.gitignore`.
 
 ## Work tracking
 
