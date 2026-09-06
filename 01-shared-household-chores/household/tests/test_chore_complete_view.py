@@ -108,6 +108,44 @@ class ChoreCompleteViewTests(TestCase):
         self.assertEqual(messages[0].message, "Invalid submission.")
         self.assertEqual(Completion.objects.count(), 0)
 
+    def test_chore_complete_rejects_invalid_member_values_without_mutation(self):
+        url = reverse("household:chore_complete", args=[self.due_chore.pk])
+        invalid_values = ("", "   ", "invalid", "²", "-1", "1.5")
+
+        for member in invalid_values:
+            with self.subTest(member=member):
+                response = self.client.post(
+                    url,
+                    {"member": member, "completion_version": 0},
+                    follow=True,
+                )
+
+                self.assertRedirects(response, reverse("household:home"))
+                messages = list(get_messages(response.wsgi_request))
+                self.assertEqual(len(messages), 1)
+                self.assertEqual(messages[0].message, "Please select a household member.")
+                self.assertEqual(Completion.objects.count(), 0)
+                self.assertEqual(self.due_chore.completion_version, 0)
+
+    def test_chore_complete_rejects_invalid_version_values_without_mutation(self):
+        url = reverse("household:chore_complete", args=[self.due_chore.pk])
+        invalid_values = ("", "   ", "invalid", "²", "-1", "1.5")
+
+        for version in invalid_values:
+            with self.subTest(version=version):
+                response = self.client.post(
+                    url,
+                    {"member": self.alex.pk, "completion_version": version},
+                    follow=True,
+                )
+
+                self.assertRedirects(response, reverse("household:home"))
+                messages = list(get_messages(response.wsgi_request))
+                self.assertEqual(len(messages), 1)
+                self.assertEqual(messages[0].message, "Invalid submission.")
+                self.assertEqual(Completion.objects.count(), 0)
+                self.assertEqual(self.due_chore.completion_version, 0)
+
     def test_chore_complete_success_flow(self):
         mock_now = datetime(2026, 9, 6, 12, 0, tzinfo=datetime_timezone.utc)
         url = reverse("household:chore_complete", args=[self.due_chore.pk])

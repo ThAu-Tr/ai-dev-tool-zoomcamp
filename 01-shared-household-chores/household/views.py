@@ -27,6 +27,14 @@ STATUS_LABELS = {
 }
 
 
+def _parse_nonnegative_ascii_integer(value: str) -> int | None:
+    """Return an integer only for non-negative ASCII decimal input."""
+
+    if not value or not value.isascii() or not value.isdecimal():
+        return None
+    return int(value)
+
+
 def _active_chore_displays() -> list[ChoreDisplay]:
     """Return active chores with due statuses and deterministic display order."""
 
@@ -134,18 +142,20 @@ def chore_complete(request, pk):
     member_raw = request.POST.get("member", "").strip()
     version_raw = request.POST.get("completion_version", "").strip()
 
-    if not member_raw or not member_raw.isdigit():
+    member_id = _parse_nonnegative_ascii_integer(member_raw)
+    if member_id is None:
         messages.error(request, "Please select a household member.")
         return redirect("household:home")
 
-    if not version_raw or not version_raw.isdigit():
+    expected_version = _parse_nonnegative_ascii_integer(version_raw)
+    if expected_version is None:
         messages.error(request, "Invalid submission.")
         return redirect("household:home")
 
     result = complete_chore(
-        member_id=int(member_raw),
+        member_id=member_id,
         chore_id=pk,
-        expected_version=int(version_raw),
+        expected_version=expected_version,
     )
 
     if result.status == CompletionStatus.SUCCESS:
