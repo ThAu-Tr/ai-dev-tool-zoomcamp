@@ -145,7 +145,22 @@ Sum all awarded completion points for the member. One chore point equals one lif
 
 Map lifetime XP to a fixed sequence of garden stages. Store thresholds in one shared definition and use the same calculation on member and neighborhood pages.
 
-The plan's example sequence is empty soil, seed, sprout, small plant, flowers, bushes, tree, and richer garden. Exact XP thresholds and artwork remain to be chosen. There is no separate Garden model, inventory, shop, or customization system.
+The progression uses these inclusive minimum lifetime-XP thresholds:
+
+| Minimum lifetime XP | Identifier | Readable label |
+| ---: | --- | --- |
+| 0 | `empty_soil` | Empty soil |
+| 25 | `seed` | Seed |
+| 75 | `sprout` | Sprout |
+| 150 | `small_plant` | Small plant |
+| 300 | `flowers` | Flowers |
+| 500 | `bushes` | Bushes |
+| 800 | `tree` | Tree |
+| 1200 | `richer_garden` | Richer garden |
+
+The member's stage is the stage with the greatest threshold less than or equal to their lifetime XP. The ordered stage definition in `household/garden.py` is the single application source of truth for thresholds, identifiers, and labels.
+
+Garden artwork will use lightweight static SVG files built from one reusable plot scene, with simple additions for each successive stage. Raster artwork, animation, and external illustration libraries are not required. Creating the artwork remains a separate task. There is no separate Garden model, inventory, shop, or customization system.
 
 Store completion timestamps as timezone-aware timestamps and convert them to `Europe/Berlin` for displayed dates, month boundaries, and due-date calculations.
 
@@ -184,11 +199,10 @@ Use focused tests for the behavior that protects household data:
 
 ## 11. Decision status
 
-The owner approved the household, scheduling, and chore-validation rules in section 7 on 2026-09-06. No choices within that decision's scope remain open.
+The owner approved the household, scheduling, chore-validation, and garden-progression rules in section 7 on 2026-09-06. The lightweight static-SVG direction is also selected. No choices within those decisions' scope remain open.
 
 The following decisions remain outside that scope:
 
-- Garden XP thresholds and artwork.
 - Hosting, production serving, and backup arrangements.
 
 ## 12. Official references
