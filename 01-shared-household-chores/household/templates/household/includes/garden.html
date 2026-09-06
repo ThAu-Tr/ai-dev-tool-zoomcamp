@@ -1,0 +1,54 @@
+<figure class="garden-visual">
+  <svg class="garden-visual__art" viewBox="0 0 320 200" role="img" aria-label="{{ member_name }}'s garden — {{ stage.label }}" xmlns="http://www.w3.org/2000/svg">
+    <g aria-hidden="true">
+      <rect width="320" height="200" rx="16" fill="#dff1fa" />
+      <path d="M0 92C58 72 112 94 160 80s103-2 160-23v143H0Z" fill="#a9d68f" />
+      <path d="M22 180C45 115 102 100 160 108s111 5 138 72Z" fill="#7b4f32" />
+      <path d="M32 177C60 147 105 140 159 146s95-3 126 28" fill="none" stroke="#95633e" stroke-width="5" stroke-linecap="round" />
+
+      {% if stage.identifier == "seed" or stage.identifier == "sprout" or stage.identifier == "small_plant" or stage.identifier == "flowers" or stage.identifier == "bushes" or stage.identifier == "tree" or stage.identifier == "richer_garden" %}
+        <ellipse cx="160" cy="148" rx="9" ry="5" fill="#e8c66c" />
+      {% endif %}
+
+      {% if stage.identifier == "sprout" or stage.identifier == "small_plant" or stage.identifier == "flowers" or stage.identifier == "bushes" or stage.identifier == "tree" or stage.identifier == "richer_garden" %}
+        <path d="M160 147v-32" fill="none" stroke="#397b43" stroke-width="6" stroke-linecap="round" />
+        <path d="M159 130c-17-3-20-15-18-20 14 1 21 8 18 20M161 123c13-5 19-15 16-22-13 2-19 10-16 22" fill="#5da757" />
+      {% endif %}
+
+      {% if stage.identifier == "small_plant" or stage.identifier == "flowers" or stage.identifier == "bushes" or stage.identifier == "tree" or stage.identifier == "richer_garden" %}
+        <path d="M160 147V91" fill="none" stroke="#397b43" stroke-width="8" stroke-linecap="round" />
+        <path d="M158 119c-25-5-31-22-28-31 22 2 32 13 28 31M162 109c23-7 31-23 26-33-23 4-31 16-26 33M159 137c-21 1-30-10-31-20 20-3 31 5 31 20" fill="#62ad5d" />
+      {% endif %}
+
+      {% if stage.identifier == "flowers" or stage.identifier == "bushes" or stage.identifier == "tree" or stage.identifier == "richer_garden" %}
+        <g fill="#f5b700">
+          <circle cx="130" cy="89" r="8" /><circle cx="187" cy="77" r="8" /><circle cx="144" cy="120" r="7" />
+        </g>
+        <g fill="#e76980">
+          <circle cx="130" cy="83" r="5" /><circle cx="124" cy="90" r="5" /><circle cx="136" cy="91" r="5" />
+          <circle cx="187" cy="71" r="5" /><circle cx="181" cy="78" r="5" /><circle cx="193" cy="79" r="5" />
+        </g>
+      {% endif %}
+
+      {% if stage.identifier == "bushes" or stage.identifier == "tree" or stage.identifier == "richer_garden" %}
+        <path d="M52 150c0-25 23-41 43-29 10-18 40-10 40 14v15ZM198 150c0-27 27-42 47-25 18-14 43 2 40 25Z" fill="#397b43" />
+        <path d="M57 143c12-13 25-12 35 0 12-18 27-14 38-2M204 142c13-17 28-14 40-1 13-14 28-11 35 1" fill="none" stroke="#62ad5d" stroke-width="8" stroke-linecap="round" />
+      {% endif %}
+
+      {% if stage.identifier == "tree" or stage.identifier == "richer_garden" %}
+        <path d="M262 143V67" fill="none" stroke="#744a2f" stroke-width="16" stroke-linecap="round" />
+        <circle cx="262" cy="57" r="39" fill="#397b43" />
+        <circle cx="235" cy="69" r="25" fill="#4c9450" />
+        <circle cx="285" cy="76" r="26" fill="#62ad5d" />
+      {% endif %}
+
+      {% if stage.identifier == "richer_garden" %}
+        <path d="M74 130c-7-30 21-45 39-26 17-22 47 0 34 26Z" fill="#4c9450" />
+        <path d="M164 78c-5-28 21-42 36-24 17-18 43 5 29 28Z" fill="#62ad5d" />
+        <g fill="#f5b700"><circle cx="91" cy="107" r="6" /><circle cx="123" cy="115" r="6" /><circle cx="182" cy="62" r="6" /><circle cx="209" cy="73" r="6" /><circle cx="277" cy="38" r="6" /></g>
+        <path d="M39 86c8-7 16-7 24 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" />
+      {% endif %}
+    </g>
+  </svg>
+  <figcaption class="garden-visual__label">{{ member_name }}'s garden — {{ stage.label }}</figcaption>
+</figure>

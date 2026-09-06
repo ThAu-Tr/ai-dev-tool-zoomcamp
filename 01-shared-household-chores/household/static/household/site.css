@@ -71,3 +71,7 @@ dd { margin: 0; overflow-wrap: anywhere; }
 .history-table th { background: #f0f4f1; font-weight: 600; font-size: .875rem; color: #4c5c51; }
 .history-table tr:last-child td { border-bottom: none; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.garden-visual { width: min(100%, 32rem); margin: 0; }
+.garden-visual__art { display: block; width: 100%; height: auto; max-height: 20rem; border: 1px solid #c8d6cb; border-radius: .5rem; background: #dff1fa; }
+.garden-visual__label { margin-top: .5rem; color: #4c5c51; font-size: .875rem; font-weight: 600; overflow-wrap: anywhere; }
+@media (min-width: 80rem) { .garden-visual { max-width: 36rem; } .garden-visual__art { max-height: 22.5rem; } }
