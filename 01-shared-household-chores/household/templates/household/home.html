@@ -4,11 +4,29 @@
   <h1>Shared Household Chores</h1>
 
   <section aria-labelledby="members-heading">
-    <h2 id="members-heading">Household members</h2>
-    {% if members %}
-      <ul class="member-list">
-        {% for member in members %}
-          <li>{{ member.name }}</li>
+    <div class="section-header">
+      <h2 id="members-heading">Household scores — {{ month_label }}</h2>
+    </div>
+    {% if member_scores %}
+      <ul class="member-list score-cards">
+        {% for score in member_scores %}
+          <li class="score-card">
+            <h3><a href="{% url 'household:member_detail' score.member.pk %}" class="member-detail-link">{{ score.member.name }}</a></h3>
+            <dl>
+              <div>
+                <dt>Monthly points</dt>
+                <dd>{{ score.monthly_points }} point{{ score.monthly_points|pluralize }}</dd>
+              </div>
+              <div>
+                <dt>Lifetime XP</dt>
+                <dd>{{ score.lifetime_xp }} XP</dd>
+              </div>
+              <div>
+                <dt>Garden stage</dt>
+                <dd>{{ score.garden_stage.label }}</dd>
+              </div>
+            </dl>
+          </li>
         {% endfor %}
       </ul>
     {% else %}
@@ -27,7 +45,10 @@
           <li class="chore-card">
             <div class="chore-card-header">
               <h3>{{ display.chore.name }}</h3>
-              <a href="{% url 'household:chore_edit' display.chore.pk %}" class="chore-edit-link">Edit</a>
+              <div class="chore-card-actions">
+                <a href="{% url 'household:chore_edit' display.chore.pk %}" class="chore-edit-link">Edit</a>
+                <a href="{% url 'household:chore_delete' display.chore.pk %}" class="chore-delete-link">Delete</a>
+              </div>
             </div>
             <dl>
               <div>
@@ -47,6 +68,24 @@
                 <dd>{{ display.status_label }}</dd>
               </div>
             </dl>
+            {% if display.eligible %}
+              <form method="post" action="{% url 'household:chore_complete' display.chore.pk %}" class="chore-complete-form">
+                {% csrf_token %}
+                <input type="hidden" name="completion_version" value="{{ display.chore.completion_version }}">
+                <div class="chore-complete-controls">
+                  <label for="id_member_{{ display.chore.pk }}">Completed by</label>
+                  <select name="member" id="id_member_{{ display.chore.pk }}" required>
+                    <option value="" disabled selected>Select member</option>
+                    {% for member in members %}
+                      <option value="{{ member.pk }}">{{ member.name }}</option>
+                    {% endfor %}
+                  </select>
+                  <button type="submit" class="btn btn--primary">Complete</button>
+                </div>
+              </form>
+            {% else %}
+              <p class="chore-not-due-notice">Not eligible for completion until {{ display.chore.next_due_date|date:"Y-m-d" }}.</p>
+            {% endif %}
           </li>
         {% endfor %}
       </ul>

@@ -71,6 +71,9 @@
         {% if is_edit %}Save changes{% else %}Create chore{% endif %}
       </button>
       <a href="{% url 'household:home' %}" class="btn btn--secondary">Cancel</a>
+      {% if is_edit %}
+        <a href="{% url 'household:chore_delete' chore.pk %}" class="btn btn--danger">Delete chore</a>
+      {% endif %}
     </div>
   </form>
 {% endblock %}

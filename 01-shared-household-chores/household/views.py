@@ -3,9 +3,11 @@ from dataclasses import dataclass
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 
+from household.completion import CompletionStatus, complete_chore
 from household.forms import ChoreForm
 from household.models import Chore, Member
 from household.scheduling import DueStatus, evaluate_due
+from household.scores import get_household_scores, get_member_scores
 
 
 @dataclass(frozen=True)
@@ -15,6 +17,7 @@ class ChoreDisplay:
     chore: Chore
     status_label: str
     status_sort_order: int
+    eligible: bool
 
 
 STATUS_LABELS = {
@@ -36,6 +39,7 @@ def _active_chore_displays() -> list[ChoreDisplay]:
                 chore=chore,
                 status_label=status_label,
                 status_sort_order=status_sort_order,
+                eligible=evaluation.eligible,
             )
         )
 
@@ -51,11 +55,14 @@ def _active_chore_displays() -> list[ChoreDisplay]:
 
 
 def home(request):
+    month_label, member_scores = get_household_scores()
     return render(
         request,
         "household/home.html",
         {
-            "members": Member.objects.order_by("display_order", "pk"),
+            "month_label": month_label,
+            "member_scores": member_scores,
+            "members": [score.member for score in member_scores],
             "active_chores": _active_chore_displays(),
         },
     )
@@ -99,5 +106,68 @@ def chore_edit(request, pk):
             "form": form,
             "chore": chore,
             "is_edit": True,
+        },
+    )
+
+
+def chore_delete(request, pk):
+    chore = get_object_or_404(Chore, pk=pk, is_active=True)
+    if request.method == "POST":
+        chore.is_active = False
+        chore.save(update_fields=["is_active"])
+        messages.success(request, f'Chore "{chore.name}" deleted.')
+        return redirect("household:home")
+
+    return render(
+        request,
+        "household/chore_confirm_delete.html",
+        {
+            "chore": chore,
+        },
+    )
+
+
+def chore_complete(request, pk):
+    if request.method != "POST":
+        return redirect("household:home")
+
+    member_raw = request.POST.get("member", "").strip()
+    version_raw = request.POST.get("completion_version", "").strip()
+
+    if not member_raw or not member_raw.isdigit():
+        messages.error(request, "Please select a household member.")
+        return redirect("household:home")
+
+    if not version_raw or not version_raw.isdigit():
+        messages.error(request, "Invalid submission.")
+        return redirect("household:home")
+
+    result = complete_chore(
+        member_id=int(member_raw),
+        chore_id=pk,
+        expected_version=int(version_raw),
+    )
+
+    if result.status == CompletionStatus.SUCCESS:
+        messages.success(request, result.message)
+    elif result.status in (CompletionStatus.STALE_VERSION, CompletionStatus.INELIGIBLE):
+        messages.warning(request, result.message)
+    else:
+        messages.error(request, result.message)
+
+    return redirect("household:home")
+
+
+def member_detail(request, pk):
+    member = get_object_or_404(Member, pk=pk)
+    score = get_member_scores(member)
+    completions = member.completions.order_by("-completed_at", "-pk")
+    return render(
+        request,
+        "household/member_detail.html",
+        {
+            "member": member,
+            "score": score,
+            "completions": completions,
         },
     )

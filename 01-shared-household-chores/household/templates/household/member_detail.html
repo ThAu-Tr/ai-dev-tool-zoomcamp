@@ -1,0 +1,56 @@
+{% extends "household/base.html" %}
+
+{% block content %}
+  <div class="page-header">
+    <a href="{% url 'household:home' %}" class="back-link">← Back to household</a>
+    <h1>{{ member.name }}</h1>
+  </div>
+
+  <section aria-labelledby="member-summary-heading">
+    <h2 id="member-summary-heading" class="visually-hidden">Member summary</h2>
+    <div class="score-card member-summary-card">
+      <dl>
+        <div>
+          <dt>Monthly points</dt>
+          <dd>{{ score.monthly_points }} point{{ score.monthly_points|pluralize }}</dd>
+        </div>
+        <div>
+          <dt>Lifetime XP</dt>
+          <dd>{{ score.lifetime_xp }} XP</dd>
+        </div>
+        <div>
+          <dt>Garden stage</dt>
+          <dd>{{ score.garden_stage.label }}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section aria-labelledby="history-heading">
+    <h2 id="history-heading">Completion history</h2>
+    {% if completions %}
+      <div class="table-responsive">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th scope="col">Chore</th>
+              <th scope="col">Date</th>
+              <th scope="col">Points</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for completion in completions %}
+              <tr>
+                <td>{{ completion.chore_name_snapshot }}</td>
+                <td><time datetime="{{ completion.completed_at|date:'c' }}">{{ completion.completed_at|date:"Y-m-d" }}</time></td>
+                <td>{{ completion.awarded_points }} pt{{ completion.awarded_points|pluralize }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p>No completions recorded yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}
