@@ -1,14 +1,51 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Shared Household Chores</title>
-  </head>
-  <body>
-    <main>
-      <h1>Shared Household Chores</h1>
-      <p>Your household chore space is coming soon.</p>
-    </main>
-  </body>
-</html>
+{% extends "household/base.html" %}
+
+{% block content %}
+  <h1>Shared Household Chores</h1>
+
+  <section aria-labelledby="members-heading">
+    <h2 id="members-heading">Household members</h2>
+    {% if members %}
+      <ul class="member-list">
+        {% for member in members %}
+          <li>{{ member.name }}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No household members available.</p>
+    {% endif %}
+  </section>
+
+  <section aria-labelledby="chores-heading">
+    <h2 id="chores-heading">Active chores</h2>
+    {% if active_chores %}
+      <ul class="chore-list">
+        {% for display in active_chores %}
+          <li class="chore-card">
+            <h3>{{ display.chore.name }}</h3>
+            <dl>
+              <div>
+                <dt>Frequency</dt>
+                <dd>{{ display.chore.frequency_days }} day{{ display.chore.frequency_days|pluralize }}</dd>
+              </div>
+              <div>
+                <dt>Points</dt>
+                <dd>{{ display.chore.points }} point{{ display.chore.points|pluralize }}</dd>
+              </div>
+              <div>
+                <dt>Due date</dt>
+                <dd><time datetime="{{ display.chore.next_due_date|date:'Y-m-d' }}">{{ display.chore.next_due_date|date:"Y-m-d" }}</time></dd>
+              </div>
+              <div>
+                <dt>Status</dt>
+                <dd>{{ display.status_label }}</dd>
+              </div>
+            </dl>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No active chores yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}
