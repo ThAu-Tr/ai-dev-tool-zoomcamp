@@ -12,7 +12,8 @@
       <div class="page-width header-content">
         <a class="brand" href="{% url 'household:home' %}">Shared Household</a>
         <nav aria-label="Primary navigation">
-          <a href="{% url 'household:home' %}">Household</a>
+          <a href="{% url 'household:home' %}"{% if request.resolver_match.url_name != "neighborhood" %} aria-current="page"{% endif %}>Household</a>
+          <a href="{% url 'household:neighborhood' %}"{% if request.resolver_match.url_name == "neighborhood" %} aria-current="page"{% endif %}>Neighborhood</a>
         </nav>
       </div>
     </header>

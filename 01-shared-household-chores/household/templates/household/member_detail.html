@@ -26,6 +26,11 @@
     </div>
   </section>
 
+  <section aria-labelledby="garden-heading">
+    <h2 id="garden-heading">{{ member.name }}'s garden</h2>
+    {% include "household/includes/garden.html" with member_name=member.name stage=score.garden_stage %}
+  </section>
+
   <section aria-labelledby="history-heading">
     <h2 id="history-heading">Completion history</h2>
     {% if completions %}

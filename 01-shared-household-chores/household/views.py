@@ -188,3 +188,16 @@ def member_detail(request, pk):
             "completions": completions,
         },
     )
+
+
+def neighborhood(request):
+    """Render every predefined member's lifetime-XP-derived garden."""
+
+    _, member_scores = get_household_scores()
+    return render(
+        request,
+        "household/neighborhood.html",
+        {
+            "member_scores": member_scores,
+        },
+    )

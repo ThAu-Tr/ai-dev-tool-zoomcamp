@@ -32,7 +32,8 @@ class HomeTests(TestCase):
         self.assertTemplateUsed(response, "household/home.html")
         self.assertTemplateUsed(response, "household/base.html")
         self.assertContains(response, '<link rel="stylesheet" href="/static/household/site.css">')
-        self.assertContains(response, '<a href="/">Household</a>', html=True)
+        self.assertContains(response, '<a href="/" aria-current="page">Household</a>', html=True)
+        self.assertContains(response, '<a href="/neighborhood/">Neighborhood</a>', html=True)
         self.assertContains(response, '<h1>Shared Household Chores</h1>', html=True)
         self.assertEqual(response.content.count(b"<h1"), 1)
 

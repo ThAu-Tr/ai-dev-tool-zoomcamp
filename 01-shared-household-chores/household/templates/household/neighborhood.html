@@ -1,0 +1,20 @@
+{% extends "household/base.html" %}
+
+{% block title %}Neighborhood gardens | Shared Household Chores{% endblock %}
+
+{% block content %}
+  <h1>Neighborhood gardens</h1>
+
+  {% if member_scores %}
+    <ul class="neighborhood-gardens">
+      {% for score in member_scores %}
+        <li class="neighborhood-garden">
+          <h2><a class="neighborhood-garden__link" href="{% url 'household:member_detail' score.member.pk %}">{{ score.member.name }}</a></h2>
+          {% include "household/includes/garden.html" with member_name=score.member.name stage=score.garden_stage %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No household members available.</p>
+  {% endif %}
+{% endblock %}

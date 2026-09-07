@@ -66,6 +66,13 @@ class MemberDetailViewTests(TestCase):
         self.assertContains(response, "Garden stage")
         self.assertContains(response, "Empty soil")
 
+    def test_member_page_renders_one_reusable_personal_garden(self):
+        response = self.client.get(self.detail_url())
+
+        self.assertContains(response, "<h2 id=\"garden-heading\">Alex's garden</h2>", html=True)
+        self.assertEqual(response.content.count(b'<figure class="garden-visual">'), 1)
+        self.assertContains(response, "Alex's garden \u2014 Empty soil")
+
     def test_summary_uses_berlin_month_points_lifetime_xp_and_garden_stage(self):
         september = datetime(2026, 9, 12, 12, 0, tzinfo=datetime_timezone.utc)
         august = datetime(2026, 8, 31, 12, 0, tzinfo=datetime_timezone.utc)

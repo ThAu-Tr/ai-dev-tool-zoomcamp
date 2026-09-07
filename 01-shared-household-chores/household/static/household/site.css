@@ -74,4 +74,10 @@ dd { margin: 0; overflow-wrap: anywhere; }
 .garden-visual { width: min(100%, 32rem); margin: 0; }
 .garden-visual__art { display: block; width: 100%; height: auto; max-height: 20rem; border: 1px solid #c8d6cb; border-radius: .5rem; background: #dff1fa; }
 .garden-visual__label { margin-top: .5rem; color: #4c5c51; font-size: .875rem; font-weight: 600; overflow-wrap: anywhere; }
+.neighborhood-gardens { display: grid; gap: 1rem; margin: 0; padding: 0; list-style: none; }
+.neighborhood-garden { min-width: 0; background: #fff; border: 1px solid #c8d6cb; border-radius: .5rem; padding: 1rem; }
+.neighborhood-garden h2 { margin: 0 0 1rem; font-size: 1.125rem; overflow-wrap: anywhere; }
+.neighborhood-garden__link { color: #204b35; text-underline-offset: 2px; }
+.neighborhood-garden .garden-visual { width: 100%; }
+@media (min-width: 40rem) { .neighborhood-gardens { grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); } }
 @media (min-width: 80rem) { .garden-visual { max-width: 36rem; } .garden-visual__art { max-height: 22.5rem; } }
