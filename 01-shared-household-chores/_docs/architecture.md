@@ -168,9 +168,9 @@ Store completion timestamps as timezone-aware timestamps and convert them to `Eu
 
 Use an isolated Python environment and pinned application dependencies. Django's development server is sufficient for local development.
 
-Deploy one application instance using a production WSGI server, with SQLite on persistent local storage. Select the hosting provider, production server, and static-file serving configuration when deployment is planned. The development server is not the production server.
+The intended production shape is one application instance using a production WSGI server, with SQLite on persistent local storage. The hosting provider, production server, static-file serving configuration, and access visibility are not selected by this architecture document; those choices belong to [backlog issue 19](https://github.com/ThAu-Tr/ai-dev-tool-zoomcamp/issues/19) and must be recorded before deployment. The development server is not the production server.
 
-Back up the database with a SQLite-aware backup method and keep the database outside replaceable application-release files. Uploaded media storage is unnecessary for predefined garden assets.
+Back up the database with a SQLite-aware backup method and keep the database outside replaceable application-release files. The concrete backup, retention, restore, and write-quiescing procedure belongs to [backlog issue 21](https://github.com/ThAu-Tr/ai-dev-tool-zoomcamp/issues/21) and is not selected here. Uploaded media storage is unnecessary for predefined garden assets.
 
 SQLite is appropriate for the expected small household workload. Reconsider PostgreSQL if hosting requires multiple application instances or concurrent writes become a practical limitation.
 
@@ -201,9 +201,10 @@ Use focused tests for the behavior that protects household data:
 
 The owner approved the household, scheduling, chore-validation, and garden-progression rules in section 7 on 2026-09-06. The lightweight static-SVG direction is also selected. No choices within those decisions' scope remain open.
 
-The following decisions remain outside that scope:
+The following decisions remain outside that scope and are intentionally pending:
 
-- Hosting, production serving, and backup arrangements.
+- Hosting and production serving ([issue 19](https://github.com/ThAu-Tr/ai-dev-tool-zoomcamp/issues/19) and [issue 20](https://github.com/ThAu-Tr/ai-dev-tool-zoomcamp/issues/20)).
+- Backup and restore arrangements ([issue 21](https://github.com/ThAu-Tr/ai-dev-tool-zoomcamp/issues/21)).
 
 ## 12. Official references
 
