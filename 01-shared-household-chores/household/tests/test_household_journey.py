@@ -1,6 +1,7 @@
 """End-to-end public household journey coverage."""
 
 from datetime import date, datetime
+import re
 from unittest.mock import patch
 from zoneinfo import ZoneInfo
 
@@ -106,20 +107,36 @@ class HouseholdJourneyTests(TestCase):
         self.assertContains(household_after_create, "2026-09-06")
         self.assertContains(household_after_create, "7 days")
         self.assertContains(household_after_create, "25 points")
+        complete_url = reverse("household:chore_complete", args=[chore.pk])
         self.assertContains(
             household_after_create,
-            reverse("household:chore_complete", args=[chore.pk]),
+            complete_url,
         )
         self.assertContains(
             household_after_create,
             f'<option value="{self.alex.pk}">Alex</option>',
         )
 
-        complete_url = reverse("household:chore_complete", args=[chore.pk])
+        completion_form = re.search(
+            rf'<form method="post" action="{re.escape(complete_url)}" '
+            r'class="chore-complete-form">(?P<body>.*?)</form>',
+            household_after_create.content.decode(),
+            flags=re.DOTALL,
+        )
+        self.assertIsNotNone(completion_form)
+        displayed_version = re.search(
+            r'<input type="hidden" name="completion_version" value="(?P<version>\d+)">',
+            completion_form.group("body"),
+        )
+        self.assertIsNotNone(displayed_version)
+        self.assertEqual(displayed_version.group("version"), "0")
         self.assertEqual(resolve(complete_url).view_name, "household:chore_complete")
         completion_response = self.client.post(
             complete_url,
-            {"member": self.alex.pk, "completion_version": 0},
+            {
+                "member": self.alex.pk,
+                "completion_version": displayed_version.group("version"),
+            },
             follow=True,
         )
         self.assertEqual(completion_response.status_code, 200)
