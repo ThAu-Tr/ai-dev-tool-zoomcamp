@@ -58,9 +58,20 @@ class HouseholdJourneyTests(TestCase):
         self.assertContains(member, "Alex's garden — Seed")
         self.assertContains(member, chore_name)
         self.assertContains(member, "25 pts")
+        self.assertContains(
+            member,
+            '<time datetime="2026-09-06T10:30:00+02:00">2026-09-06</time>',
+            html=True,
+        )
+        self.assertEqual(member.content.count(b"<tbody>"), 1)
+        self.assertEqual(member.content.count(b"<tr>"), 2)
 
         self.assertEqual(neighborhood.status_code, 200)
         self.assertContains(neighborhood, "Alex's garden — Seed")
+        self.assertContains(
+            neighborhood,
+            f'<a class="neighborhood-garden__link" href="{member_url}">Alex</a>',
+        )
 
         return household, member, neighborhood
 
@@ -93,6 +104,8 @@ class HouseholdJourneyTests(TestCase):
         self.assertContains(household_after_create, "Polish kitchen table")
         self.assertContains(household_after_create, "Due")
         self.assertContains(household_after_create, "2026-09-06")
+        self.assertContains(household_after_create, "7 days")
+        self.assertContains(household_after_create, "25 points")
         self.assertContains(
             household_after_create,
             reverse("household:chore_complete", args=[chore.pk]),
@@ -107,8 +120,14 @@ class HouseholdJourneyTests(TestCase):
         completion_response = self.client.post(
             complete_url,
             {"member": self.alex.pk, "completion_version": 0},
+            follow=True,
         )
-        self.assertRedirects(completion_response, home_url)
+        self.assertEqual(completion_response.status_code, 200)
+        self.assertEqual(completion_response.redirect_chain, [(home_url, 302)])
+        self.assertContains(
+            completion_response,
+            "Completed &quot;Polish kitchen table&quot; for Alex.",
+        )
 
         chore.refresh_from_db()
         completion = Completion.objects.get(chore=chore)
@@ -164,4 +183,3 @@ class HouseholdJourneyTests(TestCase):
         self.assertNotContains(household, "Polish dining table")
         self.assertNotContains(household, "Polish kitchen table")
         self.assertContains(member, "Polish kitchen table")
-
