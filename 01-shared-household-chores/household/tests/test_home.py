@@ -4,6 +4,7 @@ from unittest.mock import patch
 from django.contrib import messages
 from django.contrib.messages import constants as message_constants
 from django.contrib.messages.storage.cookie import CookieStorage
+from django.contrib.staticfiles import finders
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
@@ -36,6 +37,16 @@ class HomeTests(TestCase):
         self.assertContains(response, '<a href="/neighborhood/">Neighborhood</a>', html=True)
         self.assertContains(response, '<h1>Shared Household Chores</h1>', html=True)
         self.assertEqual(response.content.count(b"<h1"), 1)
+
+    def test_shared_styles_give_buttons_a_visible_keyboard_focus_indicator(self):
+        stylesheet = finders.find("household/site.css")
+
+        self.assertIsNotNone(stylesheet)
+        with open(stylesheet, encoding="utf-8") as css_file:
+            css = css_file.read()
+
+        self.assertIn("button:focus-visible", css)
+        self.assertIn("outline: 3px solid #f5b700", css)
 
     def test_members_are_displayed_in_display_order(self):
         Member.objects.create(name="Jamie", display_order=3)

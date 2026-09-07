@@ -8,6 +8,7 @@ a { color: inherit; }
 .brand { font-weight: 700; text-decoration: none; }
 nav a { display: inline-block; padding: .5rem; }
 a:focus-visible { outline: 3px solid #f5b700; outline-offset: 3px; }
+button:focus-visible { outline: 3px solid #f5b700; outline-offset: 3px; }
 main { padding-block: 2rem 3rem; }
 section + section { margin-top: 2.5rem; }
 h1, h2, h3 { line-height: 1.2; }
