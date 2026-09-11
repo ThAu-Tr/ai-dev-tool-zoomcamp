@@ -1,0 +1,321 @@
+openapi: 3.1.0
+info:
+  title: GrabTab API
+  version: 0.1.0
+  description: |
+    Backend contract required by the current GrabTab frontend. All standard
+    operations require a Bearer access token. The authenticated user belongs
+    to exactly one household; their identity is inferred from the token.
+servers:
+  - url: http://localhost:8000
+    description: Local development
+security:
+  - bearerAuth: []
+paths:
+  /v1/household/state:
+    get:
+      operationId: getHouseholdState
+      summary: Get the authenticated user's household state
+      description: Returns every resource the current frontend renders in one request.
+      responses:
+        '200':
+          description: Current household state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HouseholdState'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /v1/shopping-items:
+    post:
+      operationId: addShoppingItem
+      summary: Add an item to the shared shopping list
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+                  example: Kitchen roll
+      responses:
+        '201':
+          description: Item added
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HouseholdState' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /v1/shopping-items/{itemId}/purchase:
+    post:
+      operationId: buyShoppingItem
+      summary: Mark a shopping item as bought and create its expense
+      description: |
+        The authenticated user becomes the payer. The item is removed from the
+        active list and a shopping-sourced expense split across all household
+        members is created atomically.
+      parameters:
+        - $ref: '#/components/parameters/ItemId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount:
+                  type: number
+                  format: double
+                  exclusiveMinimum: 0
+                  example: 4.5
+      responses:
+        '200':
+          description: Purchase recorded and expense created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HouseholdState' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /v1/expenses:
+    post:
+      operationId: addExpense
+      summary: Create a direct shared expense
+      description: The authenticated user is always stored as the payer.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, amount, participantIds]
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 60
+                  example: Cleaning supplies
+                amount:
+                  type: number
+                  format: double
+                  exclusiveMinimum: 0
+                  example: 12
+                participantIds:
+                  type: array
+                  minItems: 1
+                  uniqueItems: true
+                  items: { type: string }
+                  description: Household member IDs that split the cost equally.
+                  example: [anna, clara]
+      responses:
+        '201':
+          description: Expense created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HouseholdState' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /v1/expenses/{expenseId}:
+    patch:
+      operationId: updateExpense
+      summary: Update an expense created by the authenticated user
+      description: Only the expense's payer/creator may update it.
+      parameters:
+        - $ref: '#/components/parameters/ExpenseId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, amount, participantIds]
+              properties:
+                name: { type: string, minLength: 1, maxLength: 60 }
+                amount: { type: number, format: double, exclusiveMinimum: 0 }
+                participantIds:
+                  type: array
+                  minItems: 1
+                  uniqueItems: true
+                  items: { type: string }
+      responses:
+        '200':
+          description: Expense updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HouseholdState' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      operationId: deleteExpense
+      summary: Delete an expense created by the authenticated user
+      description: Only the expense's payer/creator may delete it.
+      parameters:
+        - $ref: '#/components/parameters/ExpenseId'
+      responses:
+        '200':
+          description: Expense deleted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HouseholdState' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /v1/debt-settlements:
+    post:
+      operationId: settleDebt
+      summary: Record an externally paid pairwise debt as settled
+      description: |
+        The repayment happens outside GrabTab. This records its settlement and
+        removes that payer-to-payee debt from the frontend's outstanding list.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fromMemberId, toMemberId]
+              properties:
+                fromMemberId: { type: string, example: ben }
+                toMemberId: { type: string, example: anna }
+      responses:
+        '201':
+          description: Settlement recorded
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HouseholdState' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /v1/dev/reset-demo-data:
+    post:
+      operationId: resetDemoData
+      summary: Reset the authenticated user's demo household state
+      description: Development-only endpoint used by the frontend's “Reset demo data” button. Do not enable in production.
+      responses:
+        '200':
+          description: Demo state reset
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HouseholdState' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    ItemId:
+      name: itemId
+      in: path
+      required: true
+      schema: { type: string }
+      example: s1
+    ExpenseId:
+      name: expenseId
+      in: path
+      required: true
+      schema: { type: string }
+      example: e1
+  responses:
+    Unauthorized:
+      description: Missing, invalid, or expired access token
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: The authenticated user does not own this expense
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Resource not found in the authenticated user's household
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ValidationError:
+      description: The request body is invalid
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+  schemas:
+    HouseholdState:
+      type: object
+      required: [currentUserId, household, members, shopping, expenses, settlements]
+      properties:
+        currentUserId: { type: string, example: anna }
+        household:
+          $ref: '#/components/schemas/Household'
+        members:
+          type: array
+          items: { $ref: '#/components/schemas/Member' }
+        shopping:
+          type: array
+          items: { $ref: '#/components/schemas/ShoppingItem' }
+        expenses:
+          type: array
+          items: { $ref: '#/components/schemas/Expense' }
+        settlements:
+          type: array
+          items: { $ref: '#/components/schemas/Settlement' }
+    Household:
+      type: object
+      required: [name, inviteCode, inviteLink]
+      properties:
+        name: { type: string, example: Elm Street Home }
+        inviteCode: { type: string, example: ELM-782 }
+        inviteLink: { type: string, format: uri, example: https://grabtab.app/join/elm-782 }
+    Member:
+      type: object
+      required: [id, name, color]
+      properties:
+        id: { type: string, example: anna }
+        name: { type: string, example: Anna }
+        color: { type: string, description: Frontend avatar colour token, example: anna }
+    ShoppingItem:
+      type: object
+      required: [id, name, addedBy]
+      properties:
+        id: { type: string, example: s1 }
+        name: { type: string, example: Oat milk }
+        addedBy: { type: string, description: Member ID, example: clara }
+    Expense:
+      type: object
+      required: [id, name, amount, paidBy, participants, createdAt, source]
+      properties:
+        id: { type: string, example: e1 }
+        name: { type: string, example: Internet }
+        amount: { type: number, format: double, example: 42 }
+        paidBy: { type: string, description: Creator and payer member ID, example: anna }
+        participants:
+          type: array
+          description: Member IDs that split the expense equally.
+          items: { type: string }
+          example: [anna, ben, clara]
+        createdAt: { type: string, format: date, example: '2026-09-05' }
+        source: { type: string, enum: [direct, shopping], example: direct }
+    Settlement:
+      type: object
+      required: [id, from, to]
+      properties:
+        id: { type: string, example: st-1 }
+        from: { type: string, description: Debtor member ID, example: ben }
+        to: { type: string, description: Creditor member ID, example: anna }
+    Error:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string, example: You can only edit your own expenses }
