@@ -6,10 +6,18 @@ Course homework and experiments, with one self-contained directory per assignmen
 
 | Assignment | Project | Status |
 | --- | --- | --- |
-| 01 | [Shared Household Chores](01-shared-household-chores/README.md) | Planning complete; implementation pending |
+| 01 | [BloomMate — Shared Household Chores](01-shared-household-chores/README.md) | Full-stack MVP complete |
 | 02 | [GrabTab — Expense Splitter](02-expense-splitter/README.md) | Full-stack MVP complete |
 
 Each homework owns its dependencies, environment, documentation, and tests. Run project commands from the homework directory; see its README for instructions.
+
+## Homework 01: BloomMate
+
+BloomMate is a shared household chores app that records contributions and grows
+personal cosmetic gardens for each member. The project includes a Django
+application, SQLite persistence, templates, and a comprehensive Django test
+suite. See the [project README](01-shared-household-chores/README.md) for local
+setup and commands.
 
 ## Homework 02: GrabTab
 

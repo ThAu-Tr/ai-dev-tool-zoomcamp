@@ -1,4 +1,4 @@
-# Shared Household Chores
+# Homework 01: BloomMate — Shared Household Chores
 
 Homework 01 for AI Dev Tool Zoomcamp.
 

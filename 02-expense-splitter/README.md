@@ -1,4 +1,4 @@
-# GrabTab
+# Homework 02: GrabTab — Expense Splitter
 
 **Grab it. Add it. Share it.**
 
