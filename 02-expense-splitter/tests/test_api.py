@@ -4,7 +4,8 @@ from backend.app import create_app
 
 
 def client() -> TestClient:
-    return TestClient(create_app())
+    """Each endpoint test gets an isolated real SQLite database."""
+    return TestClient(create_app(database_url="sqlite+pysqlite:///:memory:"))
 
 
 ANNA_HEADERS = {"Authorization": "Bearer mock-anna"}
@@ -140,3 +141,18 @@ def test_reset_demo_data_restores_seeded_state() -> None:
         "Toilet paper",
         "Dishwasher tabs",
     ]
+
+
+def test_database_url_persists_data_between_app_instances(tmp_path) -> None:
+    database_url = f"sqlite:///{tmp_path / 'grabtab.db'}"
+    first_app = TestClient(create_app(database_url=database_url))
+
+    created = first_app.post(
+        "/v1/shopping-items", headers=ANNA_HEADERS, json={"name": "Coffee"}
+    )
+    second_app = TestClient(create_app(database_url=database_url))
+    reloaded = second_app.get("/v1/household/state", headers=ANNA_HEADERS)
+
+    assert created.status_code == 201
+    assert reloaded.status_code == 200
+    assert reloaded.json()["shopping"][0]["name"] == "Coffee"

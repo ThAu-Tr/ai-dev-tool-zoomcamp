@@ -7,7 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from backend.store import DomainError, MockDatabase
+from backend.store import DEFAULT_DATABASE_URL, DomainError, SqlAlchemyStore
 
 
 class ShoppingItemCreate(BaseModel):
@@ -33,8 +33,8 @@ bearer = HTTPBearer(auto_error=False)
 Credentials = Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]
 
 
-def create_app(database: MockDatabase | None = None) -> FastAPI:
-    database = database or MockDatabase()
+def create_app(database_url: str = DEFAULT_DATABASE_URL) -> FastAPI:
+    database = SqlAlchemyStore(database_url)
     app = FastAPI(title="GrabTab API", version="0.1.0")
     app.add_middleware(
         CORSMiddleware,
